@@ -11,8 +11,8 @@ export function trimSymbols(string, size) {
   if (size === undefined) {
     return string;
   }
-  const newStr = "";
-  for (const prop of string) {
+  let newStr = "";
+  for (let prop of string) {
     if (!newStr.endsWith(prop.repeat(size))) {
       newStr += prop;
     }
