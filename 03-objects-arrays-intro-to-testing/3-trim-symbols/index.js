@@ -12,7 +12,7 @@ export function trimSymbols(string, size) {
     return string;
   }
   let newStr = "";
-  for (let prop of string) {
+  for (const prop of string) {
     if (!newStr.endsWith(prop.repeat(size))) {
       newStr += prop;
     }
