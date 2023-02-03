@@ -40,7 +40,7 @@ export default class ColumnChart {
     <div class="column-chart" style="--chart-height:${this.chartHeight} ">
       <div class="column-chart__title">
         Total ${this.label}
-        <a href="/${this.label}" class="column-chart__link">View all</a>
+        ${this.renderLink()}
       </div>
       <div class="column-chart__container">
         <div data-element="header" class="column-chart__header">${
@@ -59,7 +59,7 @@ export default class ColumnChart {
     if (data.length === 0) {
       return result;
     }
-    for (let dataItem of this.getColumnProps(data)) {
+    for (const dataItem of this.getColumnProps(data)) {
       result += `<div style="--value: ${dataItem.value}" data-tooltip="${dataItem.percent}"></div>`;
     }
     return result;
@@ -72,7 +72,7 @@ export default class ColumnChart {
 
   getColumnProps(data) {
     const maxValue = Math.max(...data);
-    const scale = 50 / maxValue;
+    const scale = this.chartHeight / maxValue;
 
     return data.map((item) => {
       return {
@@ -80,5 +80,11 @@ export default class ColumnChart {
         value: String(Math.floor(item * scale)),
       };
     });
+  }
+
+  renderLink() {
+    return this.link
+      ? `<a href="/${this.label}" class="column-chart__link">View all</a>`
+      : "";
   }
 }
