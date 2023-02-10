@@ -1,14 +1,19 @@
 export default class SortableTable {
-  constructor(headersConfig, { data = [], sorted = {} } = {}) {
+  constructor(
+    headersConfig = [],
+    {
+      data = [],
+      sorted = {
+        id: headerConfig.find((item) => item.sortable).id,
+        order: "asc",
+      },
+    } = {}
+  ) {
     this.headerConfig = headersConfig;
     this.data = data;
     this.sorted = sorted;
     this.isSortLocally = true;
     this.render();
-
-    if (this.sorted.id) {
-      this.sort(this.sorted.id, this.sorted.order);
-    }
   }
 
   getTemplate() {
@@ -87,7 +92,7 @@ ${this.getBody()}
     this.element = element.firstElementChild;
     this.subElements = this.getSubElements();
     this.subElements.header.addEventListener("pointerdown", (event) => {
-      const div = event.target.closest("div");
+      const div = event.target.closest('[data-sortable="true"]');
       if (!div) return;
       const fieldValue = div.dataset.id;
       const orderValue = div.dataset.order === "desc" ? "asc" : "desc";
@@ -117,7 +122,7 @@ ${this.getBody()}
 
   sortOnClient(fieldValue, orderValue = "asc") {
     let funcCompare;
-    let rule = "st";
+    let rule = "";
     for (const column of this.headerConfig) {
       if (column.id === fieldValue && column.sortable) {
         rule = column.sortType;
