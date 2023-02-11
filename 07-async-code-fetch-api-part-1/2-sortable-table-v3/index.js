@@ -116,9 +116,7 @@ ${this.getBody()}
   }
 
   initEventListener() {
-    window.addEventListener("scroll", async (event) => {
-      await this.populate();
-    });
+    window.addEventListener("scroll", this.populate);
 
     this.subElements.header.addEventListener("pointerdown", (event) => {
       const div = event.target.closest('[data-sortable="true"]');
@@ -139,6 +137,7 @@ ${this.getBody()}
     this.remove();
     this.element = null;
     this.subElements = {};
+    window.removeEventListener("scroll", this.populate);
   }
 
   renderData() {
@@ -228,7 +227,7 @@ ${this.getBody()}
       .catch((error) => console.error("Something went wrong: " + error));
   }
 
-  async populate() {
+  populate = async () => {
     const windowRelativeBottom =
       document.documentElement.getBoundingClientRect().bottom;
     if (
@@ -254,5 +253,5 @@ ${this.getBody()}
         })
         .catch((error) => console.error("Something went wrong: " + error));
     }
-  }
+  };
 }
