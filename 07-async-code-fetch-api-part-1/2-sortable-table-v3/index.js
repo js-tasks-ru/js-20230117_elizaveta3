@@ -215,16 +215,18 @@ ${this.getBody()}
     return this.data;
   }
 
-  loadData() {
+  async loadData() {
     this.url.searchParams.set("_start", this.params.start);
     this.url.searchParams.set("_end", this.params.end);
 
-    return fetchJson(this.url)
-      .then((data) => {
-        this.data = data;
-        this.renderData();
-      })
-      .catch((error) => console.error("Something went wrong: " + error));
+    try {
+      const response = await fetchJson(this.url);
+      this.data = response;
+      this.renderData();
+      return response;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   populate = async () => {
@@ -245,13 +247,14 @@ ${this.getBody()}
       if (this.params.order)
         this.url.searchParams.set("_order", this.params.order);
 
-      await fetchJson(this.url)
-        .then((data) => {
-          this.data = this.data.concat(data);
-          this.renderData();
-          this.isLoading = false;
-        })
-        .catch((error) => console.error("Something went wrong: " + error));
+      try {
+        const response = await fetchJson(this.url);
+        this.data = this.data.concat(response);
+        this.renderData();
+        this.isLoading = false;
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 }

@@ -96,10 +96,14 @@ export default class ColumnChart {
     if (from) this.url.searchParams.set("from", from.toISOString());
     if (to) this.url.searchParams.set("to", to.toISOString());
 
-    const response = await fetchJson(this.url);
-    this.data = Object.values(response);
-    this.renderData();
-    return response;
+    try {
+      const response = await fetchJson(this.url);
+      this.data = Object.values(response);
+      this.renderData();
+      return response;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   remove() {
