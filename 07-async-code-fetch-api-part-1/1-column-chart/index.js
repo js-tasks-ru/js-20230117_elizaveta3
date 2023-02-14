@@ -14,7 +14,7 @@ export default class ColumnChart {
     data = [],
     formatHeading = (data) => data,
   } = {}) {
-    this.url = url;
+    this.url = new URL(url, BACKEND_URL);
     this.range = range;
     this.label = label;
     this.value = formatHeading(value);
@@ -81,23 +81,29 @@ export default class ColumnChart {
     this.update(this.range.from, this.range.to);
   }
 
-  async update(from, to) {
-    this.element.classList.add("column-chart_loading");
-    const startInput = from.toISOString().split("T")[0];
-    const endInput = to.toISOString().split("T")[0];
-    const url = new URL(
-      `${BACKEND_URL}/${this.url}?from=${startInput}&to=${endInput}`
-    );
-
-    const response = await fetchJson(url.href);
-    this.data = Object.values(response);
-    const value = this.data.reduce((acc, value) => (acc += value), 0);
-    this.subElements.header.innerHTML = this.formatHeading(Number(value));
-    this.subElements.body.innerHTML = this.getColumnCharts(this.data);
-    if (this.data.length) {
+  renderData() {
+    if (Object.keys(this.data).length) {
       this.element.classList.remove("column-chart_loading");
+      const value = this.data.reduce((acc, value) => (acc += value), 0);
+      this.subElements.header.innerHTML = this.formatHeading(Number(value));
+      this.subElements.body.innerHTML = this.getColumnCharts(this.data);
+    } else {
+      this.element.classList.add("column-chart_loading");
     }
-    return response;
+  }
+
+  async update(from, to) {
+    if (from) this.url.searchParams.set("from", from.toISOString());
+    if (to) this.url.searchParams.set("to", to.toISOString());
+
+    try {
+      const response = await fetchJson(this.url);
+      this.data = Object.values(response);
+      this.renderData();
+      return response;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   remove() {
