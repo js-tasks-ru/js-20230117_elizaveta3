@@ -4,19 +4,19 @@ const BACKEND_URL = "https://course-js.javascript.ru";
 
 export default class SortableTable {
   constructor(
-    headersConfig = [],
+    headerConfig = [],
     {
       url = "",
       data = [],
       sorted = {
-        /* id: headerConfig.find((item) => item.sortable).id,
-        order: "asc", */
+        id: headerConfig.find((item) => item.sortable).id,
+        order: "asc",
       },
 
       isSortLocally = false,
     } = {}
   ) {
-    this.headerConfig = headersConfig;
+    this.headerConfig = headerConfig;
     this.data = data;
     this.sorted = sorted;
     this.isSortLocally = isSortLocally;
@@ -118,14 +118,19 @@ ${this.getBody()}
   initEventListener() {
     window.addEventListener("scroll", this.populate);
 
-    this.subElements.header.addEventListener("pointerdown", (event) => {
-      const div = event.target.closest('[data-sortable="true"]');
-      if (!div) return;
-      const fieldValue = div.dataset.id;
-      const orderValue = div.dataset.order === "desc" ? "asc" : "desc";
-      this.sort(fieldValue, orderValue);
-    });
+    this.subElements.header.addEventListener(
+      "pointerdown",
+      this.sortOnColumnClick
+    );
   }
+
+  sortOnColumnClick = (event) => {
+    const column = event.target.closest('[data-sortable="true"]');
+    if (!column) return;
+    const fieldValue = column.dataset.id;
+    const orderValue = column.dataset.order === "desc" ? "asc" : "desc";
+    this.sort(fieldValue, orderValue);
+  };
 
   remove() {
     if (this.element) {
@@ -162,45 +167,33 @@ ${this.getBody()}
   }
 
   sortOnClient(fieldValue, orderValue = "asc") {
-    let funcCompare;
-    let rule = "";
-    for (const column of this.headerConfig) {
-      if (column.id === fieldValue && column.sortable) {
-        rule = column.sortType;
-      }
-    }
+    this.sortData(fieldValue, (orderValue = "asc"));
+    this.renderData();
+  }
 
-    if (rule === "number") {
-      funcCompare = compareNumber;
-    }
-    if (rule === "string") {
-      funcCompare = compareString;
-    }
-    if (rule === "date") {
-      funcCompare = compareDate;
-    }
+  sortData(fieldValue, orderValue = "asc") {
+    const directions = {
+      asc: 1,
+      desc: -1,
+    };
+    const order = directions[orderValue];
+    if (order === undefined) throw `There is no order for ${orderValur}`;
+    const sortType = this.headerConfig
+      .filter((column) => column.sortable)
+      .find((item) => item.id === fieldValue);
 
-    this.data.sort((a, b) => {
-      if (orderValue === "asc") {
-        return funcCompare(a[fieldValue], b[fieldValue]);
-      }
-      if (orderValue === "desc") {
-        return funcCompare(b[fieldValue], a[fieldValue]);
-      } else {
-        throw "There is not this sort order.";
+    return [...this.data].sort((a, b) => {
+      switch (sortType) {
+        case "number":
+          return a - b;
+        case "string":
+          return a.localeCompare(b, ["ru", "en"], { caseFirst: "upper" });
+        case "date":
+          return new Date(a) - new Date(b);
+        default:
+          throw new Error(`Неизвестный тип сортировки ${sortType}`);
       }
     });
-
-    function compareNumber(a, b) {
-      return a - b;
-    }
-    function compareString(a, b) {
-      return a.localeCompare(b, ["ru", "en"], { caseFirst: "upper" });
-    }
-    function compareDate(a, b) {
-      new Date(a) - new Date(b);
-    }
-    this.renderData();
   }
 
   async sortOnServer(id, order) {
@@ -229,6 +222,17 @@ ${this.getBody()}
     }
   }
 
+  async loadDataPopulate() {
+    try {
+      const response = await fetchJson(this.url);
+      this.data = this.data.concat(response);
+      this.renderData();
+      this.isLoading = false;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   populate = async () => {
     const windowRelativeBottom =
       document.documentElement.getBoundingClientRect().bottom;
@@ -247,14 +251,7 @@ ${this.getBody()}
       if (this.params.order)
         this.url.searchParams.set("_order", this.params.order);
 
-      try {
-        const response = await fetchJson(this.url);
-        this.data = this.data.concat(response);
-        this.renderData();
-        this.isLoading = false;
-      } catch (err) {
-        console.error(err);
-      }
+      await this.loadDataPopulate();
     }
   };
 }
