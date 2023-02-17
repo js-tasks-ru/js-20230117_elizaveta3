@@ -192,31 +192,6 @@ export default class ProductForm {
     this.subElements.uploadImage.addEventListener("click", this.uploadImage);
   }
 
-  /* loadImages() {
-    return (
-      '<ul class="sortable-list">' +
-      this.resultProduct.images
-        .map((item) => {
-          return `
-          <li class="products-edit__imagelist-item sortable-list__item" style="">
-          <input type="hidden" name="url" value="${item.url}">
-          <input type="hidden" name="source" value="${item.source}">
-          <span>
-            <img src="icon-grab.svg" data-grab-handle="" alt="grab">
-            <img class="sortable-table__cell-img" alt="Image" src="${item.url}">
-            <span>${item.source}</span>
-          </span>
-          <button type="button">
-            <img src="icon-trash.svg" data-delete-handle="" alt="delete">
-          </button>
-          </li>
-      `;
-        })
-        .join("") +
-      "</ul>"
-    );
-  } */
-
   onSubmit = (event) => {
     event.preventDefault();
     this.save();
@@ -243,17 +218,17 @@ export default class ProductForm {
     if (this.productId) product.id = this.productId;
     product.title = this.subElements.productForm.elements.title.value;
     product.description =
-      this.subElements.productForm.elements.description.value;
+    this.subElements.productForm.elements.description.value;
     product.price = Number(this.subElements.productForm.elements.price.value);
     product.discount = Number(
-      this.subElements.productForm.elements.discount.value
+    this.subElements.productForm.elements.discount.value
     );
     product.quantity = Number(
-      this.subElements.productForm.elements.quantity.value
+    this.subElements.productForm.elements.quantity.value
     );
     product.status = Number(this.subElements.productForm.elements.status.value);
     product.subcategory =
-      this.subElements.productForm.elements.subcategory.value;
+    this.subElements.productForm.elements.subcategory.value;
     product.images = this.resultProduct.images;
 
     const imagesHTMLCollection =
