@@ -127,7 +127,7 @@ export default class ProductForm {
     if (this.categories) {
       for (const category of this.categories) {
         for (const subCategory of category.subcategories) {
-          let newOption = new Option(
+          const newOption = new Option(
             `${category.title} > ${subCategory.title}`,
             subCategory.id
           );
